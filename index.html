@@ -71,72 +71,39 @@
   </div>
 
 <script>
-  const EMAILJS_PUBLIC_KEY = 'dBUOecaFM8kvYyHdd';
-  const EMAILJS_SERVICE_ID = 'service_jsu0e8j';
-  const TEMPLATE_TO_YOU = 'template_wtvcu1k'; // YOUR Founder Alert
-  const TEMPLATE_TO_THEM = 'template_04b9h5o'; // THEIR Welcome Message
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJemUYEvaOQpTVL958gPCx9uvFfvIgfqPfw8rG6RCR3of2BHzowVZWPXlxCzKndoB7/exec';
 
-  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
-  const form = document.getElementById('waitlist-form');
-  const submitBtn = document.getElementById('submit-btn');
-  const successPanel = document.getElementById('success-panel');
-  const statusEl = document.getElementById('form-status');
-
-  form.addEventListener('submit', async function(e){
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form');
+  if(!form) return;
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
-    statusEl.textContent = '';
+    const emailInput = form.querySelector('input[type="email"]');
+    const email = emailInput.value.trim();
+    if(!email) return;
     
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const whatsapp = document.getElementById('whatsapp').value.trim();
-    const gender = document.getElementById('gender').value;
-    const intent = document.getElementById('intent').value;
-
-    const fd = new FormData();
-    fd.append('name', name);
-    fd.append('email', email);
-    fd.append('whatsapp', whatsapp);
-    fd.append('gender', gender);
-    fd.append('intent', intent);
+    // Show loading
+    const btn = form.querySelector('button');
+    const oldText = btn.innerText;
+    btn.innerText = 'Joining...';
+    btn.disabled = true;
 
     try {
-      // 1. Save to Formspree
-      await fetch('https://formspree.io/f/xppzprrb', {
+      await fetch(SCRIPT_URL, {
         method: 'POST',
-        body: fd,
-        headers: { 'Accept': 'application/json' }
+        mode: 'no-cors',
+        body: JSON.stringify({email: email})
       });
-
-      // 2. Email to YOU (Founder Alert)
-      await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_YOU, {
-        from_name: name,
-        reply_to: email,
-        whatsapp: whatsapp,
-        gender: gender,
-        looking_for: intent,
-        message: `WhatsApp: ${whatsapp}, Gender: ${gender}, Intent: ${intent}`
-      });
-
-      // 3. Email to THEM (Welcome)
-      await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_THEM, {
-        from_name: name,
-        reply_to: email
-      });
-
-      form.style.display = 'none';
-      successPanel.classList.add('show');
-
-    } catch(err){
-      console.error(err);
-      statusEl.textContent = 'Saved! But email had a small issue. Check your inbox.';
-      statusEl.className = 'status success';
-      form.style.display = 'none';
-      successPanel.classList.add('show');
+      alert('✅ Siyabonga! You are on Khatholika waitlist!');
+      form.reset();
+    } catch(err) {
+      alert('Done! Check your Sheet.');
+      form.reset();
     }
+    btn.innerText = oldText;
+    btn.disabled = false;
   });
+});
 </script>
 </body>
 </html>
